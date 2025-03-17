@@ -4,7 +4,7 @@
 ![image](https://github.com/user-attachments/assets/f4fd224c-428f-4f95-bec5-66186cea6fbe)
 
 
-##파인튜닝된 모델불러오는 법
+## 파인튜닝된 모델불러오는 법
 ✅ 1. pipeline.save_pretrained()만으로 충분한 경우
 ```python
 from diffusers import StableDiffusionPipeline
@@ -14,7 +14,7 @@ pipeline = StableDiffusionPipeline.from_pretrained(
     "./lora_finetuning_save", 
     torch_dtype=torch.float16
 ).to("cuda")
-
+```
 ✔️ LoRA 가중치가 이미 U-Net에 병합된 경우
 ✔️ 다시 불러올 때 Diffusers의 from_pretrained()만 사용할 계획인 경우
 
@@ -39,5 +39,25 @@ pipeline = StableDiffusionPipeline.from_pretrained(
     "runwayml/stable-diffusion-v1-5", 
     torch_dtype=torch.float16
 ).to("cuda")
+```
 
+🔹 2단계: .safetensors 파일의 LoRA 가중치 로드
+다음으로 .safetensors 파일을 불러옵니다.
+```python
+pipeline.load_lora_weights("./lora_finetuning_30ep_lr1e04_batch_8_weights", weight_name="pytorch_lora_weights.safetensors")
+```
 
+🔹 3단계: LoRA 가중치 병합 (선택 사항)
+Diffusers에서는 LoRA 가중치를 병합해야 최종 출력을 얻을 수 있습니다.
+```python
+pipeline.fuse_lora()
+```
+
+🔹 4단계: Inference (이미지 생성)
+```python
+prompt = "A futuristic cityscape at sunset"
+image = pipeline(prompt).images[0]
+
+# 이미지 저장
+image.save("generated_image.png")
+```
