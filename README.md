@@ -5,7 +5,7 @@
 
 
 ## 파인튜닝된 모델불러오는 법
-✅ 1. pipeline.save_pretrained()만으로 충분한 경우
+### ✅ 1. pipeline.save_pretrained()만으로 충분한 경우
 ```python
 from diffusers import StableDiffusionPipeline
 
@@ -18,16 +18,34 @@ pipeline = StableDiffusionPipeline.from_pretrained(
 ✔️ LoRA 가중치가 이미 U-Net에 병합된 경우
 ✔️ 다시 불러올 때 Diffusers의 from_pretrained()만 사용할 계획인 경우
 
-✅ 2. unet_lora_state_dict가 필요한 경우
+### ✅ 2. unet_lora_state_dict가 필요한 경우
+```python
+import torch
 
+# LoRA 가중치만 추출하고 Diffusers 호환 포맷으로 변환
+unet_lora_state_dict = convert_state_dict_to_diffusers(get_peft_model_state_dict(unet))
 
+# LoRA 가중치만 따로 저장
+torch.save(unet_lora_state_dict, "./lora_finetuning_save/unet_lora_weights.pth")
+```
 다음과 같은 상황에서는 unet_lora_state_dict 저장이 필요합니다.
+🚨 로드 방법 (LoRA만 추가하는 경우)
+```python
+from diffusers import StableDiffusionPipeline
+import torch
 
+# 기본 Stable Diffusion 모델 불러오기
+pipeline = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16).to("cuda")
+
+# LoRA 가중치 추가 로드
+unet_lora_state_dict = torch.load("./lora_finetuning_save/unet_lora_weights.pth")
+pipeline.unet.load_state_dict(unet_lora_state_dict, strict=False)
+```
 ✔️ LoRA 가중치만 따로 저장하고 싶은 경우
 ✔️ 다른 모델에 LoRA만 추가하고 싶은 경우
 ✔️ LoRA 가중치를 재활용하거나 실험적으로 다양한 LoRA 모델을 적용하고 싶은 경우
 
-✅ 3. StableDiffusionPipeline.save_lora_weights()로 저장한 경우
+### ✅ 3. StableDiffusionPipeline.save_lora_weights()로 저장한 경우
 
 🔹 1단계: 기본 Stable Diffusion 모델 로드
 먼저 기본 모델을 불러옵니다.
