@@ -3,7 +3,8 @@
 
 ![image](https://github.com/user-attachments/assets/f4fd224c-428f-4f95-bec5-66186cea6fbe)
 
-
+25.03.17 현재
+epoch 30 완료 파이프라인 모델 저장 / save_lora_weights 저장 완료
 ## 파인튜닝된 모델불러오는 법
 ### ✅ 1. pipeline.save_pretrained()만으로 충분한 경우
 ```python
